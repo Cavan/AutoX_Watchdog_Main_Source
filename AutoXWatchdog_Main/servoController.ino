@@ -1,8 +1,10 @@
-/* FILE:
- * PROJECT: 
+/* FILE: servoController.ino
+ * PROJECT: AutoX Watchdog
  * PROGRAMMER: Cavan Biggs
- * FIRST VERSION: 
- * DESCRIPTION: 
+ * FIRST VERSION: March 1st 2020
+ * DESCRIPTION: The source contained in this file is responsible for controlling the servos that position the camera ...
+ *              there was a need to gain further control over the servos due to their eratic behavior such as twitiching, and moving ...
+ *              after an image was taken. This was causing the images to be blury and distorted because of the unwanted movement.
  *          
  *        
  *        
@@ -12,15 +14,15 @@
 
 
 /*
-*  FUNCTION    : 
+*  FUNCTION     : moveServos
 *
-* DESCRIPTION   : 
+* DESCRIPTION   : Controls what direction the servos will move to.
 *          
 *
-* PARAMETERS    : 
+* PARAMETERS    : int cameraAngle, int rearAngle
 *
 *
-* RETURNS     :
+* RETURNS       : void
 *
 */
 void moveServos(int cameraAngle, int rearAngle){
@@ -29,15 +31,16 @@ void moveServos(int cameraAngle, int rearAngle){
 }
 
 /*
-*  FUNCTION    : 
+*  FUNCTION     : switchOffServos
 *
-* DESCRIPTION   : 
+* DESCRIPTION   : Turns servos off to stop interference from causing them to suddenly move ...
+*                 while a picture is being taken.
 *          
 *
-* PARAMETERS    : 
+* PARAMETERS    : Servo cam, Servo rear
 *
 *
-* RETURNS     :
+* RETURNS       : void
 *
 */
 void switchOffServos(Servo cam, Servo rear){
@@ -46,15 +49,15 @@ void switchOffServos(Servo cam, Servo rear){
 }
 
 /*
-*  FUNCTION    : 
+*  FUNCTION     : switchOnServos 
 *
-* DESCRIPTION   : 
-*          
+* DESCRIPTION   : Turns the servos back on once an image is captured to ...
+*                 ensure they can move to their next target.
 *
-* PARAMETERS    : 
+* PARAMETERS    : Servo cam, Servo rear
 *
 *
-* RETURNS     :
+* RETURNS       : void
 *
 */
 void switchOnServos(Servo cam, Servo rear){

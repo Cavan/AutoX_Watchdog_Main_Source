@@ -1,10 +1,11 @@
-/* FILE: watchdog_ArduCAM_Mini_Capture2SD
+/* FILE: cameraFunctions.ino
  * PROJECT: AutoX Watchdog
  * PROGRAMMER: Cavan Biggs
  * FIRST VERSION: February 5th 2020
  * DESCRIPTION: This sketch will be used to control the camera functions and image storage.
  *          
- *        
+ * Citation: This source code was provided by the ArduCAM vendor and modified to meet the functional ...
+ *           requirements of the project.     
  *        
  *            
  *        

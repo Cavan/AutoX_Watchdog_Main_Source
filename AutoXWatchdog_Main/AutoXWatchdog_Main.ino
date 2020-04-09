@@ -1,8 +1,11 @@
-/* FILE:watchdog_pir_sensor.ino
+/* FILE:AutoXWatchdog_Main.ino
  * PROJECT: AutoX Watchdog
  * PROGRAMMER: Cavan Biggs
  * FIRST VERSION: January 27th 2020
- * DESCRIPTION: 
+ * DESCRIPTION: This file serves as the entry point for the program for setting up the hardware to start monitoring objects near by the ....
+ *              user's property. The program will monitor PIR sensors, upon the event of a sensor being triggered a servo will be instructed to 
+ *              move in the direction of the triggered sensor. Once in position the camera will then take a picture, and write it to an SD card, once that process ...
+ *              completes the user is notified by a SMS text message of the detected movement.
  *          
  *        
  *        
@@ -11,8 +14,6 @@
 */
 
 
-//www.elegoo.com
-//2016.12.9
 
 #include <Servo.h>
 #include <SoftwareSerial.h>
@@ -72,6 +73,9 @@ int rearPIR_State;
 //Time variables
 unsigned long lastDebounceTime = 0; //the last time the output pin was toggled
 unsigned long debounceDelay = 10000; //the debounce time.
+//Pir sensor startup - sensors need 1 minute to startup
+unsigned long systemStartupTime = 0; //How long has the system been powered on?
+unsigned long startupDelay = 60000; //60000 milliseconds = 1 minute
 
 void setup() {
   
@@ -198,21 +202,36 @@ void loop() {
 }
 
 /*
-*  FUNCTION    : 
+*  FUNCTION     : MotionSensorInitialization
 *
-* DESCRIPTION   : 
+* DESCRIPTION   : Waits 1 minute to allow PIR sensors to initialize
 *          
 *
-* PARAMETERS    : 
+* PARAMETERS    : void
 *
 *
-* RETURNS     :
+* RETURNS       : void
 *
 */
 //PIR Sensors have a 1 minute initialization period when system is powered on
 void MotionSensorInitialization(){
-    delay(60000);
     
+
+  //unsigned long systemStartupTime = 0; //How long has the system been powered on?
+  //unsigned long startupDelay = 60000; //60000 milliseconds = 1 minute
+
+
+    while(1){
+      if((millis() - systemStartupTime) > startupDelay)
+      {
+          //after 1 minute break out of loop
+          Serial.println("PIR sensors are initialized");
+          break;
+      }
+
+      systemStartupTime = millis()
+     
+  }
 }
 
 
@@ -220,15 +239,16 @@ void MotionSensorInitialization(){
 
 //GSM code
 /*
-*  FUNCTION    : 
+*  FUNCTION     : updateSerial
 *
-* DESCRIPTION   : 
+* DESCRIPTION   : Facilitates communication between the arduino microcontroller, and the GSM unit ...
+*                 through serial communication over the RX and TX lines.
 *          
 *
-* PARAMETERS    : 
+* PARAMETERS    : void
 *
 *
-* RETURNS     :
+* RETURNS       : void
 *
 */
 void updateSerial()
@@ -273,15 +293,16 @@ void updateSerial()
 
 
 /*
-*  FUNCTION    : 
+*  FUNCTION     : processCommands
 *
-* DESCRIPTION   : 
+* DESCRIPTION   : This method is responsible for taking the incoming commands and checking ...
+*                 validility, and executing the appropriate action related to that command.
 *          
 *
-* PARAMETERS    : 
+* PARAMETERS    : String const command, String moreInfo
 *
 *
-* RETURNS     :
+* RETURNS       : void
 *
 */
 //Process the incoming command
@@ -354,15 +375,16 @@ void processCommands(String const command, String moreInfo){
 }
 
 /*
-*  FUNCTION    : 
+*  FUNCTION     : prepareResponse
 *
-* DESCRIPTION   : 
+* DESCRIPTION   : This method sends back the response to the users mobile number ...
+*                 after receiving an incoming command from the user.
 *          
 *
-* PARAMETERS    : 
+* PARAMETERS    : String responseMSG
 *
 *
-* RETURNS     :
+* RETURNS       : void 
 *
 */
 void prepareResponse(String responseMSG){
@@ -380,15 +402,16 @@ switchOffServos(camServo, rearServo);
 }
 
 /*
-*  FUNCTION    : 
+*  FUNCTION     : responseSMS
 *
-* DESCRIPTION   : 
+* DESCRIPTION   : Sends the preparedResponse from the arduino to the sim900 unit which will ...
+*                 then send the SMS over the cellular network to the users phone number.
 *          
 *
 * PARAMETERS    : 
 *
 *
-* RETURNS     :
+* RETURNS       :
 *
 */
 void responseSMS()
