@@ -48,6 +48,10 @@ String const RESP_LEFT_IMG_CAPTURED = "Captured left image";
 String const RESP_RIGHT_IMG_CAPTURED = "Captured right image";
 String const RESP_READ_IMG_CAPTURED = "Captured rear image";
 
+//System response number 
+String const USER_NUMBER = "AT+CMGS=\"+15196088364\"";
+
+
 String incomingCMD = "";
 
 //Variables for delaying sensors
@@ -112,6 +116,11 @@ void setup() {
   mySerial.println("AT+CNMI=1,2,0,0,0"); // Decides how newly arrived SMS messages should be handled
   //Replace this with a startup method
   updateSerial();
+  
+  //MMS Setup
+  mmsConfiguration();
+
+
 
   //Camera setup
   camera_SD_setup();
@@ -143,18 +152,18 @@ void loop() {
         
           //Check if servos are already in position
           //Move servo to Front 90 degrees
-          moveServos(90, 90);
+          //moveServos(90, 90);
             Serial.println("Front motion sensor: FRONT MOTION DETECTED");
             
             //Send alert SMS
-           // processCommands(LOOKFRONT, "| ALERT:->Motion was detected at front of vehicle");
+            processCommands(LOOKFRONT, "| ALERT:->Motion was detected at front of vehicle");
             //lastFrontPIR_State = frontPirValue;
             lastDebounceTime = millis();
             moveCamera = false;
        }
       else if (leftPirValue == HIGH && moveCamera == true)
         {
-               moveServos(180, 90);
+               //moveServos(180, 90);
               Serial.println("Left motion sensor: LEFT MOTION DETECTED");
                //Send alert SMS
               processCommands(LOOKLEFT, ",| ALERT:->Motion was detected at left side of vehicle");
@@ -164,20 +173,20 @@ void loop() {
         }
       else if (rightPirValue == HIGH && moveCamera == true)
           {          
-               moveServos(0, 90);   
+               //moveServos(0, 90);   
               Serial.println("Right motion sensor: RIGHT MOTION DETECTED");
                //Send alert SMS
-              //processCommands(LOOKRIGHT, "| ALERT:->Motion was detected at right side of vehicle");
+              processCommands(LOOKRIGHT, "| ALERT:->Motion was detected at right side of vehicle");
               //lastRightPIR_State = rightPirValue;
               lastDebounceTime = millis();
               moveCamera = false;
           }
       else if (rearPirValue == HIGH && moveCamera == true){
 
-              moveServos(180, 180);
+              //moveServos(180, 180);
               Serial.println("Rear motion sensor: REAR MOTION DETECTED");
                //Send alert SMS
-              //processCommands(LOOKBEHIND, "| ALERT:->Motion was detected at the rear of the vehicle");
+              processCommands(LOOKBEHIND, "| ALERT:->Motion was detected at the rear of the vehicle");
               //lastRearPIR_State = rearPirValue;
               lastDebounceTime = millis();
               moveCamera = false;
@@ -188,6 +197,18 @@ void loop() {
   updateSerial();
 }
 
+/*
+*  FUNCTION    : 
+*
+* DESCRIPTION   : 
+*          
+*
+* PARAMETERS    : 
+*
+*
+* RETURNS     :
+*
+*/
 //PIR Sensors have a 1 minute initialization period when system is powered on
 void MotionSensorInitialization(){
     delay(60000);
@@ -198,7 +219,18 @@ void MotionSensorInitialization(){
 
 
 //GSM code
-
+/*
+*  FUNCTION    : 
+*
+* DESCRIPTION   : 
+*          
+*
+* PARAMETERS    : 
+*
+*
+* RETURNS     :
+*
+*/
 void updateSerial()
 {
   int cmdIndex = 0;
@@ -239,6 +271,19 @@ void updateSerial()
   
 }
 
+
+/*
+*  FUNCTION    : 
+*
+* DESCRIPTION   : 
+*          
+*
+* PARAMETERS    : 
+*
+*
+* RETURNS     :
+*
+*/
 //Process the incoming command
 void processCommands(String const command, String moreInfo){
 
@@ -253,19 +298,23 @@ void processCommands(String const command, String moreInfo){
 
   if (command.equals(LOOKFRONT))
   {
+    //Reattach Servos
+    switchOnServos(camServo, rearServo);
     //Check if servos are already in position
           //Move servo to Front 90 degrees
          //Position the servos
-         // moveServos(90, 90);
+          moveServos(90, 90);
     Serial.println(RESP_FRONT_IMG_CAPTURED);
     //Capture image
     myCAMSaveToSDFile();
     prepareResponse("Front Image Captured " + moreInfo);
   }
   else if(command.equals(LOOKLEFT)){
+    //Reattach Servos
+    switchOnServos(camServo, rearServo);
    //Move servo to Left 180 degrees
               //Position the servos
-            //  moveServos(180, 90);
+              moveServos(180, 90);
   Serial.println(RESP_LEFT_IMG_CAPTURED);
   //Capture image
     myCAMSaveToSDFile();
@@ -273,10 +322,12 @@ void processCommands(String const command, String moreInfo){
     
   }
   else if(command.equals(LOOKRIGHT)){
+    //Reattach Servos
+    switchOnServos(camServo, rearServo);
     //Move camera to the right and capture image
    //Move servo to the right 0 degrees
               //Position the servos
-               // moveServos(0, 90);
+                moveServos(0, 90);
     Serial.println(RESP_RIGHT_IMG_CAPTURED);
     //Capture image
     myCAMSaveToSDFile();
@@ -284,9 +335,11 @@ void processCommands(String const command, String moreInfo){
     
   }
   else if(command.equals(LOOKBEHIND)){
+    //Reattach Servos
+    switchOnServos(camServo, rearServo);
     //Due to the servos being limited to 180 degrees we need to use 2 to capture the rear view
               //Position the servos
-             // moveServos(180, 180);
+              moveServos(180, 180);
     Serial.println(RESP_READ_IMG_CAPTURED);
     //Capture image
     myCAMSaveToSDFile();
@@ -300,20 +353,44 @@ void processCommands(String const command, String moreInfo){
   
 }
 
+/*
+*  FUNCTION    : 
+*
+* DESCRIPTION   : 
+*          
+*
+* PARAMETERS    : 
+*
+*
+* RETURNS     :
+*
+*/
 void prepareResponse(String responseMSG){
 //detach servos to stop interference 
 switchOffServos(camServo, rearServo);
   mySerial.println("AT+CMGF=1"); // Configuring TEXT mode
   responseSMS();
-  mySerial.println("AT+CMGS=\"+15196088364\"");//change ZZ with country code and xxxxxxxxxxx with phone number to sms
+  mySerial.println(USER_NUMBER);//change ZZ with country code and xxxxxxxxxxx with phone number to sms
   responseSMS();
   mySerial.print(responseMSG); //text content
   responseSMS();
   mySerial.write(26);
  //Reattach servos when processing is done
- switchOnServos(camServo, rearServo);
+ //switchOnServos(camServo, rearServo);
 }
 
+/*
+*  FUNCTION    : 
+*
+* DESCRIPTION   : 
+*          
+*
+* PARAMETERS    : 
+*
+*
+* RETURNS     :
+*
+*/
 void responseSMS()
 {
   delay(500);
