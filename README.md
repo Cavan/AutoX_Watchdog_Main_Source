@@ -20,4 +20,4 @@ This repo is for the AutoX Watchdog hardware unit the project is part of a Capst
 
 **Hardware Unit Assembled**
 
-![](Q:\Q_SoftwareDevelopment\SystemsProject\System_Code_For_Prototype\IMG_20200410_015728.jpg)
+![IMG-20200410-015728](https://i.ibb.co/BTnBwWp/IMG-20200410-015728.jpg)
